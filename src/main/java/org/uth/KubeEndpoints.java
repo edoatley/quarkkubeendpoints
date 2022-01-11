@@ -3,6 +3,7 @@ package org.uth;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -32,10 +33,12 @@ public class KubeEndpoints
 
     StringBuffer response = new StringBuffer();
 
-    for(Namespace project : client.namespaces().list().getItems())
+    for( Project project : client.projects().list().getItems())
     {
-      response.append( project.getMetadata().getName() + "/n" );
+      response.append( project.getMetadata().getName() + "\n" );
     }
+
+    response.append( "\nTargeting " + namespace + "\n");
 
     for( Pod pod : client.pods().inNamespace(namespace).list().getItems())
     {
