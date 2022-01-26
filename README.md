@@ -1,3 +1,10 @@
+
+# An Example of direct OpenShift API integration from JAVA/Quarkus using Fabric8 API
+
+This is a base example of how to connect programmatically to an OpenShift cluster; the example provides a Quarkus based
+RESTful set of endpoints that query various components of a pre-auth'd OCP cluster. This is a WIP and is code just to show 
+the basics of how to do it.
+
 # quarkkubeendpoints Project
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
