@@ -6,10 +6,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/endpoints")
@@ -26,16 +23,20 @@ public class KubeEndpoints
   @GET
   @Path("/pods")
   @Produces(MediaType.TEXT_PLAIN)
-  public String envtest( @QueryParam("namespace") String namespace )
+  public String envtest(@DefaultValue("default") @QueryParam("namespace") String namespace, @DefaultValue("false") @QueryParam("list") boolean listProjects )
   {
     System.out.println( namespace );
     System.out.println( "Found " + client.projects().list().getItems().size() + " projects...");
 
     StringBuffer response = new StringBuffer();
 
-    for( Project project : client.projects().list().getItems())
+    // Only render the project list if the parameter indicates to
+    if( listProjects )
     {
-      response.append( project.getMetadata().getName() + "\n" );
+      for (Project project : client.projects().list().getItems())
+      {
+        response.append(project.getMetadata().getName() + "\n");
+      }
     }
 
     response.append( "\nTargeting " + namespace + "\n");
