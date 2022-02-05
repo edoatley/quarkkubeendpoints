@@ -1,53 +1,67 @@
-package org.uth;
+package org.uth
 
-import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.openshift.api.model.Project;
-import io.fabric8.openshift.client.OpenShiftClient;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import io.fabric8.openshift.client.OpenShiftClient
+import java.lang.StringBuffer
+import io.fabric8.openshift.api.model.Project
+import io.fabric8.kubernetes.api.model.Pod
+import javax.inject.Inject
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
 
 @Path("/endpoints")
-public class KubeEndpoints
-{
-  public KubeEndpoints() {}
+class KubeEndpoints {
+    @Inject
+    lateinit var client: OpenShiftClient
 
-//  @Inject
-//  KubernetesClient client;
+    @POST
+    @Path("/secrets")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun updatePassword(
+        @QueryParam("namespace") namespace: String?,
+        @QueryParam("secret-name") secretName: String?,
+        @QueryParam("secret-key") secretKey: String?,
+        @QueryParam("secret-value") secretValue: String?
+    ): String? {
 
-  @Inject
-  OpenShiftClient client;
-
-  @GET
-  @Path("/pods")
-  @Produces(MediaType.TEXT_PLAIN)
-  public String envtest(@DefaultValue("default") @QueryParam("namespace") String namespace, @DefaultValue("false") @QueryParam("list") boolean listProjects )
-  {
-    System.out.println( namespace );
-    System.out.println( "Found " + client.projects().list().getItems().size() + " projects...");
-
-    StringBuffer response = new StringBuffer();
-
-    // Only render the project list if the parameter indicates to
-    if( listProjects )
-    {
-      for (Project project : client.projects().list().getItems())
-      {
-        response.append(project.getMetadata().getName() + "\n");
-      }
+        val secret = client.secrets().inNamespace(namespace).withName(secretName)
+            .takeIf { s -> s.get().data.containsKey(secretKey) }
+            .edit { s -> s.get().data.set(secretKey, secretValue) }
+            .
     }
 
-    response.append( "\nTargeting " + namespace + "\n");
+    @GET
+    @Path("/pods")
+    @Produces(MediaType.TEXT_PLAIN)
+    fun envtest(
+        @DefaultValue("default") @QueryParam("namespace") namespace: String,
+        @DefaultValue("false") @QueryParam("list") listProjects: Boolean
+    ): String {
+        println(namespace)
+        println("Found " + client!!.projects().list().items.size + " projects...")
+        val response = StringBuffer()
 
-    for( Pod pod : client.pods().inNamespace(namespace).list().getItems())
-    {
-      //response.append( pod.toString() + "\n" );
-      //response.append( pod.getMetadata().toString() + "\n" );
-      response.append( pod.getMetadata().getName() + ", " + pod.getMetadata().getLabels() + "\n" );
+        // Only render the project list if the parameter indicates to
+        if (listProjects) {
+            for (project in client!!.projects().list().items) {
+                response.append(
+                    """
+    ${project.metadata.name}
+    
+    """.trimIndent()
+                )
+            }
+        }
+        response.append("\nTargeting $namespace\n")
+        for (pod in client!!.pods().inNamespace(namespace).list().items) {
+            //response.append( pod.toString() + "\n" );
+            //response.append( pod.getMetadata().toString() + "\n" );
+            response.append(
+                """
+    ${pod.metadata.name}, ${pod.metadata.labels}
+    
+    """.trimIndent()
+            )
+        }
+        return response.toString()
     }
-
-    return response.toString();
-  }
 }

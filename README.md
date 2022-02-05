@@ -65,3 +65,15 @@ If you want to learn more about building native executables, please consult http
 Easily start your RESTful Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+
+## Blog link
+
+https://devepiphany.org/2022/01/26/quarkus-and-kube-a-match-made-in-heaven/
+
+Sample request:
+
+```shell
+curl http://localhost:8080/endpoints/pods?namespace=sandbox&list=true
+```
+
+[Fabric8 OpenShift client](https://www.javadoc.io/doc/io.fabric8/kubernetes-model/1.0.12/io/fabric8/openshift/api/model/package-summary.html)
